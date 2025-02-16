@@ -1,0 +1,31 @@
+---
+title: "download_coor"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{download_coor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(SMNdataR)
+```
+
+# Cargar lista de estaciones a memoria
+
+```{r}
+data("estaciones")
+```
+
+# Descargar las coordenadas de todas las estaciones
+
+```{r}
+descargar_coordenadas_bloque(estaciones$CLAVE)
+```
