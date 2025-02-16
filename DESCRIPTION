@@ -21,3 +21,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://github.com/sasoryhaf91/SMNdataR
+BugReports: https://github.com/sasoryhaf91/SMNdataR/issues
