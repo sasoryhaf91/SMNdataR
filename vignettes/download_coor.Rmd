@@ -27,5 +27,5 @@ data("estaciones")
 # Descargar las coordenadas de todas las estaciones
 
 ```{r}
-descargar_coordenadas_bloque(estaciones$CLAVE)
+coordenas_mx <- descargar_coordenadas_bloque(estaciones$CLAVE)
 ```
