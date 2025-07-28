@@ -29,3 +29,13 @@ data("estaciones")
 ```{r}
 coordenas_mx <- descargar_coordenadas_bloque(estaciones$CLAVE)
 ```
+
+```{r}
+df_all <- smndata_download_stations_daily(
+         stations = estaciones$CLAVE,
+         start_date = "2020-01-01",
+         end_date = "2020-12-31",
+         variable = c("prec", "evap"),
+         output_format = "all")
+```
+
