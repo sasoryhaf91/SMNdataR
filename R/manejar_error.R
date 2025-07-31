@@ -7,7 +7,7 @@
 #' @param max_attempts Número máximo de intentos (por defecto 1).
 #' @return Resultado de la evaluación de la expresión. Si se agotan los intentos, se lanza un error.
 #' @export
-manejar_error <- function(expr, max_attempts = 3) {
+manejar_error <- function(expr, max_attempts = 10) {
   for (attempt in seq_len(max_attempts)) {
     result <- tryCatch(
       expr,
