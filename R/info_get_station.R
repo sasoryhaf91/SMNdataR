@@ -1,37 +1,37 @@
-#' Get Station Metadata from Internal Package Data
+#' Get Station Metadata
 #'
-#' Retrieves available metadata for a given station ID from the `estaciones` dataset
-#' stored in the `data/` folder of the package.
+#' Retrieves station metadata for one or multiple station IDs or from a data frame.
 #'
-#' @param station_id A numeric or character code representing the station ID.
+#' @param input A single station ID, a vector of IDs, or a data frame containing a 'CLAVE' column.
 #'
-#' @return A data frame with the metadata of the station, or an empty data frame if not found.
-#'
-#' @examples
-#' smn_info_get_station(7116)
-#' smn_info_get_station("30129")
-#'
+#' @return A data frame with station metadata.
 #' @export
-smn_info_get_station <- function(station_id) {
-  # Cargar la base de datos desde el entorno del paquete
+smn_info_get_station <- function(input) {
   if (!exists("stations", where = .GlobalEnv)) {
     data("stations", package = "SMNdataR", envir = environment())
   }
 
-  # Convertir station_id a carácter y eliminar decimales innecesarios
-  station_id <- as.character(as.integer(station_id))
-
-  # Verificar si la estación está presente
-  if (!"station" %in% names(stations)) {
-    stop("The 'stations' dataset does not contain a 'station' column.")
+  # Case 1: data.frame with station info
+  if (is.data.frame(input)) {
+    if ("station" %in% names(input)) {
+      station_ids <- unique(input$CLAVE)
+    } else {
+      stop("The input data frame must contain a 'station' column.")
+    }
+  } else {
+    # Case 2: vector or single ID
+    station_ids <- as.character(as.integer(input))
   }
 
-  result <- dplyr::filter(stations, as.character(station) == station_id)
+  # Progress bar
+  pb <- utils::txtProgressBar(min = 0, max = length(station_ids), style = 3)
+  result <- lapply(seq_along(station_ids), function(i) {
+    utils::setTxtProgressBar(pb, i)
+    smn_int_get_station(station_ids[i])
+  })
+  close(pb)
 
-  if (nrow(result) == 0) {
-    message("No information found for station ID: ", station_id)
-    return(data.frame())
-  }
-
-  return(result)
+  output <- do.call(rbind, result)
+  return(output)
 }
+

@@ -28,7 +28,7 @@
 #'
 #' @details
 #' This function relies on two helper functions:
-#' \itemize{
+#' \itemize{smd
 #'   \item \code{smndata_download_station_raw(station)}: Downloads the raw daily data with columns
 #'         "date", "prec", "evap", "tmax", and "tmin".
 #'   \item \code{smndata_extract_coordinates(station)}: Extracts the station's latitude, longitude, and altitude.
@@ -67,7 +67,7 @@ smndata_download_station <- function(station,
 
   # Download raw daily data using the optimized raw download function
   df <- tryCatch({
-    smndata_download_station_raw(station)
+    smn_dl_download_station_raw(station)
   }, error = function(e) {
     stop("Error downloading raw data for station ", station, ": ", conditionMessage(e))
   })
@@ -82,7 +82,7 @@ smndata_download_station <- function(station,
   }
 
   # Extract station coordinates using the helper function
-  coords <- smndata_extract_coordinates(station)
+  coords <- smn_int_extract_coordinates(station)
 
   n <- nrow(df)
   res <- data.frame(

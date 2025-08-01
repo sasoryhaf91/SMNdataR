@@ -27,7 +27,13 @@
 smn_info_extract_coordinates <- function(stations) {
   stations <- as.character(stations)
 
-  results <- lapply(stations, function(st) {
+  pb <- txtProgressBar(min = 0, max = length(stations), style = 3)
+
+  results <- vector("list", length(stations))
+
+  for (i in seq_along(stations)) {
+    st <- stations[i]
+
     coords <- tryCatch(
       smn_int_extract_coordinates(st),
       error = function(e) {
@@ -36,14 +42,18 @@ smn_info_extract_coordinates <- function(stations) {
       }
     )
 
-    data.frame(
+    results[[i]] <- data.frame(
       station = st,
       latitude = coords$latitude,
       longitude = coords$longitude,
       altitude = coords$altitude,
       stringsAsFactors = FALSE
     )
-  })
 
-  do.call(rbind, results)
+    setTxtProgressBar(pb, i)
+  }
+
+  close(pb)
+  return(do.call(rbind, results))
 }
+
