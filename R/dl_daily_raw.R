@@ -1,4 +1,4 @@
-#' Download Raw Daily Data for a Station (Resilient via readLines)
+#' Download Raw Daily Data for a Station
 #'
 #' Downloads and parses the raw daily data file from SMN using the internal URL
 #' and `readLines()`, similar to how metadata is retrieved.
@@ -8,24 +8,20 @@
 #' @return A data frame with columns: date, prec, evap, tmax, tmin.
 #'
 #' @export
-smn_dl_download_station_raw <- function(station) {
+smn_dl_daily_raw <- function(station) {
   station <- as.character(station)
   url <- smn_int_get_url(station)
 
-  # Leer líneas con manejo de error robusto
   lines <- smn_int_handle_error({
     readLines(url)
   }, max_attempts = 10)
 
-  # Validar contenido
   if (is.null(lines) || length(lines) < 26) {
-    stop("Archivo de datos vacío o mal formado para estación ", station)
+    stop("Data file is empty or malformed for station ", station)
   }
 
-  # Extraer solo las líneas de datos (después de la cabecera, usualmente 25)
   data_lines <- lines[-(1:25)]
 
-  # Leer como tabla a partir de las líneas
   df <- readr::read_table2(
     file = I(data_lines),
     col_names = c("date", "prec", "evap", "tmax", "tmin"),
@@ -41,4 +37,6 @@ smn_dl_download_station_raw <- function(station) {
 
   return(df)
 }
+
+
 
