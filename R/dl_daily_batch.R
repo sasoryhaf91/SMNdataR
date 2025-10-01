@@ -29,9 +29,7 @@
 smn_dl_daily_batch <- function(stations,
                                start_date = "1984-01-01",
                                end_date = Sys.Date(),
-                               variable = c("prec", "evap", "tmax", "tmin","T2M_MAX", "T2M_MIN", "RH2M", "PRECTOTCORR", "WS2M",
-                                            "PS", "ALLSKY_SFC_SW_DWN",
-                                            "QV2M"),
+                               variable = c("prec", "evap", "tmax", "tmin","T2M_MAX", "T2M_MIN", "RH2M", "PRECTOTCORR", "EVLAND",),
                                output_format = c("all", "reduced"),
                                csv_file = NULL,
                                source = c("single", "nasa")) {
