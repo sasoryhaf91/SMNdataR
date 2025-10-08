@@ -90,11 +90,7 @@ smn_dl_daily_single <- function(station,
   # ---- retrieve coordinates (fast defaults; tolerate failure) ---------------
   coords <- tryCatch(
     smn_int_extract_coordinates(
-      station,
-      max_attempts  = 2,
-      timeout_sec   = 4,
-      warn_on_na    = FALSE,
-      add_meta_cols = FALSE
+      station
     ),
     error = function(e) data.frame(latitude = NA_real_, longitude = NA_real_, altitude = NA_real_)
   )
