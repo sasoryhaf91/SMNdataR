@@ -72,7 +72,7 @@ smn_info_extract_coordinates <- function(stations,
       }
     )
 
-    # Asegura columnas clave y coerce tipos
+    # --
     if (!all(c("latitude","longitude","altitude") %in% names(coords))) {
       coords <- data.frame(latitude = NA_real_, longitude = NA_real_, altitude = NA_real_)
     }
@@ -85,7 +85,7 @@ smn_info_extract_coordinates <- function(stations,
       stringsAsFactors = FALSE
     )
 
-    # Si el usuario pidió meta cols (p.ej. add_meta_cols=TRUE en ...), añádelas si existen
+    # --
     extra_cols <- setdiff(names(coords), c("latitude","longitude","altitude"))
     if (length(extra_cols)) {
       for (cn in extra_cols) row[[cn]] <- coords[[cn]][1]
