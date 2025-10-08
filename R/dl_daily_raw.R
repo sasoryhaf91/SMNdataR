@@ -33,17 +33,18 @@ smn_dl_daily_raw <- function(station,
   }
   station <- as.character(station)
 
-  # Internal helper must exist in your package
+  # Build URL (internal helper)
   url <- smn_int_get_url(station)
 
   # ---- download lines with retry & encoding ---------------------------------
+  # IMPORTANT: pass `envir = environment()` so the expression sees `url` and `encoding`
   lines <- smn_int_handle_error(
     {
-      # quiet read, tolerate incomplete final line
       readLines(url, warn = FALSE, encoding = encoding)
     },
     max_attempts = max_attempts,
-    quiet = TRUE
+    quiet        = TRUE,
+    envir        = environment()
   )
 
   if (is.null(lines) || length(lines) == 0L) {
@@ -56,7 +57,6 @@ smn_dl_daily_raw <- function(station,
   lines <- lines[nchar(lines) > 0L]
 
   # ---- detect first data row by date pattern --------------------------------
-  # Expected SMN format: YYYY-MM-DD <spaces> prec evap tmax tmin
   is_data <- grepl("^\\d{4}-\\d{2}-\\d{2}\\b", lines)
   if (!any(is_data)) {
     stop("No data rows detected for station ", station, " (url: ", url, ")")
@@ -65,9 +65,7 @@ smn_dl_daily_raw <- function(station,
   data_lines <- lines[first_row:length(lines)]
 
   # ---- parse with readr if present; otherwise base R ------------------------
-  na_tokens <- "NULO"  # SMN missing sentinel
-  df <- NULL
-
+  na_tokens <- "NULO"  # SMN sentinel
   if (requireNamespace("readr", quietly = TRUE)) {
     df <- readr::read_table2(
       file = I(data_lines),
@@ -98,7 +96,7 @@ smn_dl_daily_raw <- function(station,
     df$date <- as.Date(df$date)
   }
 
-  # ---- minimal sanity checks -------------------------------------------------
+  # ---- sanity checks ---------------------------------------------------------
   if (!nrow(df)) {
     stop("Parsed zero data rows for station ", station, " (url: ", url, ")")
   }
@@ -106,7 +104,7 @@ smn_dl_daily_raw <- function(station,
     warning("Unusual dates detected in station ", station, ". Please inspect the source file.")
   }
 
-  # ---- optionally add meta columns; always set attributes --------------------
+  # ---- optional meta columns; always attributes ------------------------------
   if (isTRUE(add_meta_cols)) {
     df$station    <- station
     df$source_url <- url
