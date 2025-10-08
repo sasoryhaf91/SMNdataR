@@ -57,6 +57,3 @@ smn_int_extract_numeric <- function(text) {
 }
 
 
-  vapply(tokens, normalize_token, numeric(1))
-}
-
