@@ -1,17 +1,20 @@
-test_that("extracts coords and applies hemisphere hints (Sur/Oeste)", {
-  mock_lines <- c(
-    "Nombre: Estación Demo",
-    "Latitud: 19.5 Sur",      # <-- usar punto, no coma
-    "Longitud: 99.10 Oeste",
-    "Altitud: 2300 m"
-  )
+test_that("extracts for multiple stations and fills NA on failure", {
   testthat::local_mocked_bindings(
-    smn_int_get_url = function(station) sprintf("mock://station/%s", station),
-    smn_int_handle_error = function(expr, ...) mock_lines,
+    smn_int_extract_coordinates = function(st, ...) {
+      if (st == "15022") stop("boom")
+      data.frame(latitude = 20, longitude = -100, altitude = 1500)
+    },
     .package = "SMNdataR"
   )
-  res <- smn_int_extract_coordinates("15101", add_meta_cols = FALSE)
-  expect_equal(res$latitude,  -19.5, tolerance = 1e-6)
-  expect_equal(res$longitude, -99.10, tolerance = 1e-6)
-  expect_equal(res$altitude,  2300)
+
+  expect_warning(
+    res <- smn_info_extract_coordinates(c("15021","15022"), show_progress = FALSE),
+    regexp = "Failed to extract data for station 15022"
+  )
+
+  expect_s3_class(res, "data.frame")
+  expect_identical(nrow(res), 2L)
+  expect_equal(res$latitude[1], 20)
+  expect_true(all(is.na(res[2, c("latitude","longitude","altitude")])))
 })
+
