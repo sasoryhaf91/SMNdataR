@@ -1,7 +1,7 @@
 #' Build a local square grid around a point (km-based) and clip by radius
 #' (robust CRS handling)
 #' @export
-smn_make_grid <- function(lat, lon,
+smn_int_make_grid <- function(lat, lon,
                                 cell_km   = 5,
                                 radius_km = 20,
                                 clip      = c("intersect", "centroid"),
