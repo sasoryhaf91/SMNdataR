@@ -1,85 +1,59 @@
 #' Download and Aggregate Monthly Climate Data (single station)
 #'
-#' Downloads daily SMN data for a station, aggregates it to monthly values for
-#' one or more variables, applies a completeness rule per month, and returns
-#' the result in either *long* (tidy) or *reduce* (wide) format.
+#' Downloads daily SMN data for a station and aggregates to monthly values for
+#' one or more variables.
+#'
+#' **Long format (updated):**
+#' - One row per month.
+#' - Columns: `station, latitude, longitude, altitude, date, <vars...>`.
+#'   If multiple variables are requested, columns include the requested subset
+#'   among `prec, evap, tmin, tmax`. If a single variable is requested, only
+#'   that variable column is included (plus metadata).
+#'
+#' **Reduce format (unchanged):**
+#' - Wide per variable (one table per variable if multiple are requested) with
+#'   `YEAR`, `JAN..DEC`, `ACUM`, `PROM`, `MONTHS`.
 #'
 #' @param station Character or numeric station code.
 #' @param variables Character vector of variables to aggregate, or `"all"`.
 #'   Valid names: `"prec"`, `"evap"`, `"tmax"`, `"tmin"`. Default `"all"`.
 #' @param start_date Start date (inclusive). Default `"1961-01-01"`.
 #' @param end_date End date (inclusive). Default `Sys.Date()`.
-#' @param max_missing_frac Numeric in `[0,1]`. If the fraction of missing days
-#'   in a month exceeds this threshold, the monthly value is set to `NA`.
-#'   Default `0.2` (i.e., allow up to 20% missing days).
+#' @param max_missing_frac Numeric in `[0,1]`. Fraction of missing days allowed
+#'   per month before setting the monthly value to `NA`. Default `0.2`.
 #' @param output_format `"long"` or `"reduce"` (default `"reduce"`).
-#'   - `"long"`: one tidy table with columns
-#'     `station, latitude, longitude, altitude, variable, YEAR, MONTH, value`.
-#'   - `"reduce"`: wide table(s) per variable, one row per YEAR, columns `JAN..DEC`
-#'     plus `ACUM` (annual sum or mean, see Details), `PROM` (mean across valid
-#'     months), and `MONTHS` (number of valid months). If multiple variables
-#'     are requested, a named `list` of wide tables is returned.
-#' @param aggregator Either a single function (applied to all variables) or a
-#'   **named list** mapping variable name -> function (e.g.,
-#'   `list(prec = sum, tmax = mean)`). If `NULL`, defaults are used:
-#'   `sum` for `prec,evap`; `mean` for `tmax,tmin`.
-#' @param csv_file Optional path. If provided:
-#'   - For `"long"`: a single CSV is written at `csv_file`.
-#'   - For `"reduce"` with multiple variables: one CSV per variable using
-#'     `paste0(tools::file_path_sans_ext(csv_file), "_", var, ".csv")`.
+#' @param aggregator Single function (applied to all variables) **or** a named
+#'   list `list(var = fun, ...)`. Defaults: `sum` for `prec/evap`, `mean` for
+#'   `tmax/tmin`.
+#' @param csv_file Optional path to write a CSV. For `"long"` a single file; for
+#'   `"reduce"` with multiple variables, one file per variable with a suffix.
 #'
 #' @return
-#' - If `output_format = "long"`: a single tidy `data.frame`.
-#' - If `output_format = "reduce"` and length(variables) == 1: a wide `data.frame`.
-#' - If `output_format = "reduce"` and length(variables) > 1: a **named list**
-#'   of wide `data.frame`s (one per variable).
-#'
-#' @details
-#' Missing fraction is computed against the **expected number of days** in each
-#' month within the requested date window; days not present in the raw data are
-#' treated as missing. `ACUM` is the **row sum** for sum-type variables
-#' (`prec, evap`) and the **row mean** for mean-type variables (`tmax, tmin`);
-#' `PROM` is always the row mean across valid months.
-#'
-#' @examples
-#' \dontrun{
-#' # All variables, monthly, as a tidy table including station metadata:
-#' m_long <- smn_dl_monthly_single(
-#'   station = "15101",
-#'   variables = "all",
-#'   start_date = "1984-01-01",
-#'   end_date   = "2020-12-31",
-#'   output_format = "long"
-#' )
-#'
-#' # Only precipitation, wide format:
-#' m_prec <- smn_dl_monthly_single("15101", variables = "prec", output_format = "reduce")
-#'
-#' # Custom aggregation (median for all vars) and stricter completeness (<=10% missing):
-#' m_med <- smn_dl_monthly_single("15101", variables = c("tmax","tmin"),
-#'                                max_missing_frac = 0.10, aggregator = median,
-#'                                output_format = "long")
-#' }
+#' - `"long"`: a single `data.frame` with columns
+#'   `station, latitude, longitude, altitude, date, <vars...>`.
+#' - `"reduce"`: a `data.frame` (one variable) or a named `list` of tables
+#'   (multiple variables).
 #'
 #' @export
 smn_dl_monthly_single <- function(station,
                                   variables = "all",
                                   start_date = "1961-01-01",
                                   end_date   = Sys.Date(),
-                                  max_missing_frac = 0.9,
+                                  max_missing_frac = 0.2,
                                   output_format = c("reduce", "long"),
                                   aggregator = NULL,
                                   csv_file   = NULL) {
   output_format <- match.arg(output_format)
 
-  # ---- download once (full to carry metadata) -------------------------------
-  daily <- smn_dl_daily_single(station, start_date, end_date, output_format = "full", del_na = "no")
+  # ---- download once (carry metadata) ---------------------------------------
+  daily <- smn_dl_daily_single(station, start_date, end_date,
+                               output_format = "full", del_na = "no")
   if (!nrow(daily)) {
     warning("No daily data available for station ", station, " in the specified date range.")
     return(if (output_format == "long") data.frame() else data.frame())
   }
 
-  # ---- discover variables & validate ----------------------------------------
+  # ---- variables -------------------------------------------------------------
   all_vars <- intersect(c("prec","evap","tmax","tmin"), names(daily))
   if (identical(variables, "all")) variables <- all_vars
   variables <- unique(as.character(variables))
@@ -90,7 +64,7 @@ smn_dl_monthly_single <- function(station,
          paste(missing, collapse = ", "))
   }
 
-  # ---- metadata (first non-NA row if possible) ------------------------------
+  # ---- metadata (first complete row; fallback to first) ---------------------
   st_chr <- as.character(station)
   meta_row <- daily[stats::complete.cases(daily[, c("latitude","longitude","altitude")]), , drop = FALSE]
   if (!nrow(meta_row)) meta_row <- daily[1, , drop = FALSE]
@@ -111,7 +85,7 @@ smn_dl_monthly_single <- function(station,
     }
   }
 
-  # ---- build complete calendar (so missing days are counted) ----------------
+  # ---- complete calendar (count missing days properly) ----------------------
   start_date <- min(daily$date, na.rm = TRUE)
   end_date   <- max(daily$date, na.rm = TRUE)
   cal <- data.frame(date = seq(start_date, end_date, by = "day"))
@@ -123,75 +97,81 @@ smn_dl_monthly_single <- function(station,
     vdf$YEAR  <- as.integer(format(vdf$date, "%Y"))
     vdf$MONTH <- as.integer(format(vdf$date, "%m"))
 
-    out <- stats::aggregate(list(
-      expected_days = vdf$val      # placeholder; we will replace
-    ), by = list(YEAR = vdf$YEAR, MONTH = vdf$MONTH), FUN = length)
-    names(out)[3] <- "expected_days"
+    # expected (calendar) days
+    expected <- stats::aggregate(list(expected_days = vdf$val),
+                                 by = list(YEAR = vdf$YEAR, MONTH = vdf$MONTH), FUN = length)
+    # missing days
+    missing  <- stats::aggregate(list(missing_days = is.na(vdf$val)),
+                                 by = list(YEAR = vdf$YEAR, MONTH = vdf$MONTH), FUN = sum)
+    # aggregated value
+    value    <- stats::aggregate(list(value = vdf$val),
+                                 by = list(YEAR = vdf$YEAR, MONTH = vdf$MONTH),
+                                 FUN = function(x) agg_map[[var]](x, na.rm = TRUE))
 
-    miss <- stats::aggregate(list(missing_days = is.na(vdf$val)),
-                             by = list(YEAR = vdf$YEAR, MONTH = vdf$MONTH), FUN = sum)
-    val  <- stats::aggregate(list(value = vdf$val),
-                             by = list(YEAR = vdf$YEAR, MONTH = vdf$MONTH),
-                             FUN = function(x) agg_map[[var]](x, na.rm = TRUE))
-
-    out <- merge(out, miss, by = c("YEAR","MONTH"), all = TRUE)
-    out <- merge(out, val,  by = c("YEAR","MONTH"), all = TRUE)
+    out <- merge(merge(expected, missing, by = c("YEAR","MONTH"), all = TRUE),
+                 value, by = c("YEAR","MONTH"), all = TRUE)
     out$missing_frac <- with(out, ifelse(expected_days > 0, missing_days / expected_days, NA_real_))
     out$value[out$missing_frac > max_missing_frac] <- NA_real_
+    out$date <- as.Date(sprintf("%d-%02d-01", out$YEAR, out$MONTH))
     out$variable <- var
-    out[order(out$YEAR, out$MONTH), c("YEAR","MONTH","variable","value")]
+    out[order(out$YEAR, out$MONTH), c("date","variable","value")]
   }
 
   monthly_list <- lapply(variables, monthly_one)
   monthly_all  <- do.call(rbind, monthly_list)
   rownames(monthly_all) <- NULL
 
-  # ---- outputs ---------------------------------------------------------------
+  # ---- LONG format (updated: one row per month, columns per variable) -------
   if (output_format == "long") {
-    long <- monthly_all
-    # attach station metadata as requested
-    long$station   <- st_chr
-    long$latitude  <- lat
-    long$longitude <- lon
-    long$altitude  <- alt
-    names(long)[names(long) == "value"] <- "value"
-
-    # order columns
-    long <- long[, c("station","latitude","longitude","altitude",
-                     "variable","YEAR","MONTH","value"), drop = FALSE]
-    long <- long[order(long$variable, long$YEAR, long$MONTH), , drop = FALSE]
-    rownames(long) <- NULL
+    # pivot wider using base reshape
+    df <- monthly_all[, c("date","variable","value")]
+    wide <- reshape(df, idvar = "date", timevar = "variable", direction = "wide")
+    # rename value.<var> -> <var>
+    names(wide) <- sub("^value\\.", "", names(wide))
+    # ensure only requested vars, in desired order
+    keep_vars <- intersect(variables, c("prec","evap","tmin","tmax"))
+    for (v in setdiff(keep_vars, names(wide))) wide[[v]] <- NA_real_
+    wide <- wide[, c("date", keep_vars), drop = FALSE]
+    # attach metadata columns
+    wide$station   <- st_chr
+    wide$latitude  <- lat
+    wide$longitude <- lon
+    wide$altitude  <- alt
+    # order columns: station, lat, lon, alt, date, <vars...>
+    wide <- wide[, c("station","latitude","longitude","altitude","date", keep_vars), drop = FALSE]
+    wide <- wide[order(wide$date), , drop = FALSE]
+    rownames(wide) <- NULL
 
     if (!is.null(csv_file)) {
-      utils::write.csv(long, file = csv_file, row.names = FALSE)
+      utils::write.csv(wide, file = csv_file, row.names = FALSE)
       message("CSV file saved at: ", csv_file)
     }
-    return(long)
+    return(wide)
   }
 
-  # reduce (wide) per variable
+  # ---- REDUCE format (unchanged) --------------------------------------------
   month_labels <- c("JAN","FEB","MAR","APR","MAY","JUN",
                     "JUL","AUG","SEP","OCT","NOV","DEC")
 
   reduce_one <- function(var) {
-    df <- monthly_all[monthly_all$variable == var, c("YEAR","MONTH","value")]
+    df <- monthly_all[monthly_all$variable == var, c("date","value")]
     if (!nrow(df)) {
       return(data.frame(YEAR = integer(), matrix(numeric(), nrow = 0, ncol = 12,
                                                  dimnames = list(NULL, month_labels)),
                         ACUM = numeric(), PROM = numeric(), MONTHS = integer()))
     }
-    df$MONTH <- factor(df$MONTH, levels = 1:12, labels = month_labels)
-    wide <- reshape(df, idvar = "YEAR", timevar = "MONTH", direction = "wide")
-    # clean colnames "value.JAN" -> "JAN"
+    df$YEAR  <- as.integer(format(df$date, "%Y"))
+    df$MONTH <- factor(as.integer(format(df$date, "%m")), levels = 1:12, labels = month_labels)
+
+    wide <- reshape(df[, c("YEAR","MONTH","value")], idvar = "YEAR", timevar = "MONTH", direction = "wide")
     names(wide) <- sub("^value\\.", "", names(wide))
-    # ensure all month columns present
     for (m in setdiff(month_labels, names(wide))) wide[[m]] <- NA_real_
     wide <- wide[, c("YEAR", month_labels), drop = FALSE]
-    # ACUM and PROM
+
     is_sum <- var %in% c("prec","evap")
     month_mat <- as.matrix(wide[, month_labels, drop = FALSE])
-    ACUM <- if (is_sum) rowSums(month_mat, na.rm = TRUE) else rowMeans(month_mat, na.rm = TRUE)
-    PROM <- rowMeans(month_mat, na.rm = TRUE)
+    ACUM   <- if (is_sum) rowSums(month_mat, na.rm = TRUE) else rowMeans(month_mat, na.rm = TRUE)
+    PROM   <- rowMeans(month_mat, na.rm = TRUE)
     MONTHS <- rowSums(!is.na(month_mat))
     out <- cbind(wide, ACUM = ACUM, PROM = PROM, MONTHS = MONTHS)
     out[order(out$YEAR), , drop = FALSE]
