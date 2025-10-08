@@ -2,24 +2,85 @@ Package: SMNdataR
 Type: Package
 Title: Tools for Processing Mexican SMN Climatological Data
 Version: 0.1.0
-Author: Antonio, H. (<uiem.haf@example.com>)
-Maintainer: Antonio, H. <uiem.haf@example.com>
-Description: This package contains functions to download, process, and analyze climatological data from the Servicio Meteorológico Nacional of México.
-License: MIT
+Authors@R: 
+    c(
+      person(
+        given  = "Hugo",
+        family = "Antonio-Fernández",
+        email  = "uiem.haf@gmail.com",
+        role   = c("aut", "cre"),
+        comment = c(
+          ORCID = "0000-0002-5355-8476",
+          preferred_name = "Hugo Antonio-Fernández",
+          other_emails = "antonio.hugo@colpos.mx; hugo.antonio@umb.mx"
+        )
+      ),
+      person(
+        given  = "Humberto",
+        family = "Vaquera-Huerta",
+        role   = "ctb",
+        comment = c(ORCID = "0000-0002-2805-804X")
+      ),
+      person(
+        given  = "Moisés Michel",
+        family = "Rosengaus-Moshinsky",
+        role   = "ctb"
+      ),
+      person(
+        given  = "Paulino",
+        family = "Pérez-Rodríguez",
+        role   = "ctb",
+        comment = c(ORCID = "0000-0002-3202-1784")
+      ),
+      person(
+        given  = "José",
+        family = "Crossa",
+        role   = "ctb",
+        comment = c(ORCID = "0000-0001-9429-5855")
+      ),
+      person(
+        given   = "Colegio de Postgraduados",
+        role    = "cph",
+        comment = c(URL = "https://www.colpos.mx")
+      ),
+      person(
+        given   = "Universidad Mexiquense del Bicentenario",
+        role    = "cph",
+        comment = c(URL = "https://www.umb.mx")
+      )
+    )
+Description: Functions to download, clean, and analyze daily and monthly
+    climatological data from Mexico's National Weather Service (SMN), including
+    robust retrieval, parsing, and aggregation utilities. The package provides
+    reproducible pipelines for station metadata, daily time series, and monthly
+    summaries with completeness checks.
+License: MIT + file LICENSE
+URL: https://github.com/sasoryhaf91/SMNdataR
+BugReports: https://github.com/sasoryhaf91/SMNdataR/issues
+Depends:
+    R (>= 3.5)
 Encoding: UTF-8
+Language: en
+LazyData: true
 Imports:
     dplyr,
     tidyr,
     lubridate,
+    stringr,
+    httr,
+    jsonlite,
+    readr,
     rlang,
-    geosphere
-Languaje: es
-Depends: 
-    R (>= 3.5)
-LazyData: true
-Suggests: 
+    stats,
+    utils
+Suggests:
+    testthat (>= 3.0.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    covr,
+    desc,
+    usethis
 VignetteBuilder: knitr
-URL: https://github.com/sasoryhaf91/SMNdataR
-BugReports: https://github.com/sasoryhaf91/SMNdataR/issues
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
