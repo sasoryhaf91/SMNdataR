@@ -37,7 +37,7 @@ smn_dl_daily_raw <- function(station,
   url <- smn_int_get_url(station)
 
   # ---- download lines with retry & encoding ---------------------------------
-  # IMPORTANT: pass `envir = environment()` so the expression sees `url` and `encoding`
+  # pass `envir = environment()` so the expression sees local vars (`url`, `encoding`)
   lines <- smn_int_handle_error(
     {
       readLines(url, warn = FALSE, encoding = encoding)
@@ -57,6 +57,7 @@ smn_dl_daily_raw <- function(station,
   lines <- lines[nchar(lines) > 0L]
 
   # ---- detect first data row by date pattern --------------------------------
+  # Expected SMN format: YYYY-MM-DD <spaces> prec evap tmax tmin
   is_data <- grepl("^\\d{4}-\\d{2}-\\d{2}\\b", lines)
   if (!any(is_data)) {
     stop("No data rows detected for station ", station, " (url: ", url, ")")
@@ -65,33 +66,52 @@ smn_dl_daily_raw <- function(station,
   data_lines <- lines[first_row:length(lines)]
 
   # ---- parse with readr if present; otherwise base R ------------------------
-  na_tokens <- "NULO"  # SMN sentinel
+  na_tokens <- "NULO"  # SMN missing sentinel
+
   if (requireNamespace("readr", quietly = TRUE)) {
-    df <- readr::read_table2(
-      file = I(data_lines),
-      col_names = c("date", "prec", "evap", "tmax", "tmin"),
-      col_types = readr::cols(
-        date = readr::col_date(format = ""),
-        prec = readr::col_double(),
-        evap = readr::col_double(),
-        tmax = readr::col_double(),
-        tmin = readr::col_double()
-      ),
-      na = na_tokens,
-      progress = FALSE
-    )
+    # Prefer modern readr; fallback for older versions
+    if (utils::packageVersion("readr") >= "2.0.0") {
+      df <- readr::read_table(
+        file = I(data_lines),
+        col_names = c("date", "prec", "evap", "tmax", "tmin"),
+        col_types = readr::cols(
+          date = readr::col_date(format = ""),
+          prec = readr::col_double(),
+          evap = readr::col_double(),
+          tmax = readr::col_double(),
+          tmin = readr::col_double()
+        ),
+        na = na_tokens,
+        progress = FALSE
+      )
+    } else {
+      df <- readr::read_table2(
+        file = I(data_lines),
+        col_names = c("date", "prec", "evap", "tmax", "tmin"),
+        col_types = readr::cols(
+          date = readr::col_date(format = ""),
+          prec = readr::col_double(),
+          evap = readr::col_double(),
+          tmax = readr::col_double(),
+          tmin = readr::col_double()
+        ),
+        na = na_tokens,
+        progress = FALSE
+      )
+    }
     df <- as.data.frame(df)
   } else {
+    # Base R fallback (dependency-free)
     con <- textConnection(data_lines)
     on.exit(close(con), add = TRUE)
     df <- utils::read.table(
       con,
-      header     = FALSE,
-      col.names  = c("date", "prec", "evap", "tmax", "tmin"),
-      colClasses = c("character", rep("numeric", 4)),
-      na.strings = na_tokens,
-      fill       = TRUE,
-      strip.white= TRUE
+      header      = FALSE,
+      col.names   = c("date", "prec", "evap", "tmax", "tmin"),
+      colClasses  = c("character", rep("numeric", 4)),
+      na.strings  = na_tokens,
+      fill        = TRUE,
+      strip.white = TRUE
     )
     df$date <- as.Date(df$date)
   }
