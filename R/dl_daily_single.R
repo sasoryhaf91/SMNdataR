@@ -41,13 +41,22 @@ smn_dl_daily_single <- function(station,
   station <- as.character(station)
 
   # ---- date handling ---------------------------------------------------------
-  start_date <- as.Date(start_date)
-  end_date   <- as.Date(end_date)
-  if (is.na(start_date) || is.na(end_date)) {
-    stop("`start_date` and `end_date` must be coercible to Date.")
+
+  .parse_date <- function(x, name) {
+    d <- tryCatch(as.Date(x),
+                  error = function(e) NA,
+                  warning = function(w) suppressWarnings(as.Date(x)))
+    if (is.na(d)) {
+      stop(sprintf("`%s` must be coercible to Date.", name), call. = FALSE)
+    }
+    d
   }
+
+  start_date <- .parse_date(start_date, "start_date")
+  end_date   <- .parse_date(end_date,   "end_date")
+
   if (end_date < start_date) {
-    stop("`end_date` must be on or after `start_date`.")
+    stop("`end_date` must be on or after `start_date`.", call. = FALSE)
   }
 
   # ---- expected empty shapes -------------------------------------------------
