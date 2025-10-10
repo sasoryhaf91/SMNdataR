@@ -34,7 +34,7 @@
 #' )
 #' }
 #' @export
-smn_dl_daily_nasa_point <- function(station,
+smn_dl_daily_nasa <- function(station,
                                     lat,
                                     lon,
                                     start_date = "1984-01-01",
