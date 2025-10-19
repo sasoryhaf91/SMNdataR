@@ -6,28 +6,27 @@
 #' @param station Character. A label or node name to tag the time series (e.g., "Toluca_Node").
 #' @param lat Numeric. Latitude in decimal degrees (WGS84).
 #' @param lon Numeric. Longitude in decimal degrees (WGS84).
+#' @param altitude Numeric (optional). Altitude of the point (m a.s.l.). Default `NA_real_`.
 #' @param start_date Start date (YYYY-MM-DD). If earlier than 1984-01-01, it is
 #'   automatically adjusted to `1984-01-01` (POWER coverage).
 #' @param end_date End date (YYYY-MM-DD). Default `Sys.Date()`.
 #' @param vars Character vector of POWER parameter short names. Defaults to a compact
 #'   set: `c("T2M_MAX","T2M_MIN","RH2M","PRECTOTCORR","EVLAND")`.
-#'   (Add/replace with any supported parameters.)
 #' @param community POWER community. Default `"AG"`. (Common alternatives: `"SSE"`, `"RE"`)
 #' @param retries Integer. Max GET retries on failure (default 5).
 #' @param sleep_sec Numeric. Seconds to sleep between retries (default 3).
 #' @param output_format Either `"all"` (default) or `"reduce"`. The `"reduce"` option
-#'   keeps only `date, station, latitude, longitude` and the requested variables.
+#'   keeps only `station, latitude, longitude, altitude, date` and the requested variables.
 #'
-#' @return A `data.frame` with:
-#'   - `date` (Date),
-#'   - requested POWER variables (numeric; `-999` mapped to `NA`),
-#'   - metadata columns: `station`, `latitude`, `longitude`, `source_url`.
+#' @return A `data.frame` ordered by `date` with columns:
+#'   `station, latitude, longitude, altitude, date, <requested POWER variables>`.
+#'   POWER missing values `-999` are returned as `NA`.
 #'
 #' @examples
 #' \dontrun{
-#' nasa_df <- smn_dl_daily_nasa_point(
+#' nasa_df <- smn_dl_daily_nasa(
 #'   station = "Toluca_Node",
-#'   lat = 19.289, lon = -99.657,
+#'   lat = 19.289, lon = -99.657, altitude = 2670,
 #'   start_date = "2020-01-01", end_date = "2020-12-31",
 #'   vars = c("T2M_MAX","T2M_MIN","PRECTOTCORR"),
 #'   output_format = "reduce"
@@ -35,15 +34,16 @@
 #' }
 #' @export
 smn_dl_daily_nasa <- function(station,
-                                    lat,
-                                    lon,
-                                    start_date = "1984-01-01",
-                                    end_date   = Sys.Date(),
-                                    vars = c("T2M_MAX","T2M_MIN","RH2M","PRECTOTCORR","EVLAND"),
-                                    community = "AG",
-                                    retries = 5,
-                                    sleep_sec = 3,
-                                    output_format = c("all","reduce")) {
+                              lat,
+                              lon,
+                              altitude = NA_real_,
+                              start_date = "1984-01-01",
+                              end_date   = Sys.Date(),
+                              vars = c("T2M_MAX","T2M_MIN","RH2M","PRECTOTCORR","EVLAND"),
+                              community = "AG",
+                              retries = 5,
+                              sleep_sec = 3,
+                              output_format = c("all","reduce")) {
 
   output_format <- match.arg(output_format)
 
@@ -125,20 +125,26 @@ smn_dl_daily_nasa <- function(station,
     out
   })
 
-  # >>> FIX: build the data frame without stringsAsFactors in rbind.data.frame
+  # build the data frame
   if (requireNamespace("dplyr", quietly = TRUE)) {
     df <- dplyr::bind_rows(rows)
   } else {
     df <- do.call(rbind, lapply(rows, as.data.frame))
   }
 
-  df$station    <- as.character(station)
-  df$latitude   <- as.numeric(lat)
-  df$longitude  <- as.numeric(lon)
+  # metadata
+  df$station   <- as.character(station)
+  df$latitude  <- as.numeric(lat)
+  df$longitude <- as.numeric(lon)
+  df$altitude  <- as.numeric(altitude)
   df$source_url <- url
 
+  # colocar metadatos delante y ordenar
+  front <- c("station","latitude","longitude","altitude","date")
+  df <- cbind(df[front], df[setdiff(names(df), front)], stringsAsFactors = FALSE)
+
   if (output_format == "reduce") {
-    keep <- unique(c("date","station","latitude","longitude", intersect(colnames(df), vars)))
+    keep <- unique(c("station","latitude","longitude","altitude","date", intersect(colnames(df), vars)))
     df <- df[, keep, drop = FALSE]
   }
 
