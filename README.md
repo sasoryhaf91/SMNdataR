@@ -1,26 +1,7 @@
+# SMNdataR: Tools for Processing and Analyzing Mexican Meteorological Data for Climatological Applications
 
-# SMNdataR
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.xxxx/zenodo.xxxxxx.svg)](https://doi.org/10.xxxx/zenodo.xxxxxx)
 
-<!-- badges: start -->
-<!-- badges: end -->
-
-The goal of SMNdataR is to ...
-
-## Installation
-
-You can install the development version of SMNdataR from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("pak")
-pak::pak("sasoryhaf91/SMNdataR")
-```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(SMNdataR)
-## basic example code
-```
-
+**SMNdataR** provides reproducible tools to access, clean, and analyze daily and monthly meteorological data from the Mexican National Weather Service (SMN).  
+It serves as a foundation for climatological, hydrological, and environmental research across Mexico.
