@@ -1,2 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^vignettes/.*\.html$
+^vignettes/.*\.R$
+^doc$
+^Meta$
+^paper$
+^CITATION\.cff$
+^LICENSE\.md$
+

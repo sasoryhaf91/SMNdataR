@@ -1,0 +1,13 @@
+citHeader("To cite SMNdataR in publications use:")
+
+citEntry(
+  entry = "Manual",
+  title = "SMNdataR: Tools to download and harmonize SMN/NASA data",
+  author = personList(
+    person("Hugo Antonio", "Fernández"),
+    person("Coautora/o", "Apellido")
+  ),
+  year = "2025",
+  note = "R package version 0.1.0",2
+  url = "https://github.com/sasoryhaf91/SMNdataR"
+)

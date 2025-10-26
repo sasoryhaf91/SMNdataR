@@ -44,9 +44,10 @@ smn_int_get_url <- function(station) {
 
   state <- state_mapping[[id]]
   if (is.null(state)) {
-    stop("Unknown state id parsed from `station`: '", id,
-         "'. Expected 1–2 digit state code followed by a 3-digit station id.")
+    stop("Unknown state id parsed from `station`: ", id,
+         ". Expected 1-2 digit state code followed by a 3-digit station id.")
   }
+
 
   # 'dia0' for 1-digit state ids; 'dia' otherwise
   prefix <- if (nchar(id) == 1L) "dia0" else "dia"

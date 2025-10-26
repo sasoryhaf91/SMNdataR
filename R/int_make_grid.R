@@ -1,5 +1,13 @@
 #' Build a local square grid around a point (km-based) and clip by radius
 #' (robust CRS handling)
+#' @param lat Numeric latitude of center (WGS84).
+#' @param lon Numeric longitude of center (WGS84).
+#' @param cell_km Numeric cell size in kilometers (default 1).
+#' @param radius_km Numeric radius (km) for square/round extent.
+#' @param clip Logical; clip by country polygon (if available).
+#' @param crs_out Output CRS EPSG code (default 4326).
+#' @param return Character: "sf" or "data.frame".
+
 #' @export
 smn_int_make_grid <- function(lat, lon,
                                 cell_km   = 5,

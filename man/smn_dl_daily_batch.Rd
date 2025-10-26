@@ -38,6 +38,8 @@ are present they will be used directly.}
 
 \item{del_na}{One of "no" (default) or "yes". If "yes", rows with NAs are dropped at the end.}
 
+\item{require_coords}{Logical. For NASA/Hybrid: resolve coordinates when missing in \code{stations}.}
+
 \item{vars}{Character vector of NASA POWER parameter codes (used in \code{"nasa"}/\code{"hybrid"}).}
 
 \item{community}{POWER community for \code{"nasa"}/\code{"hybrid"}; one of \verb{"AG","RE","SB"} (default \code{"AG"}).}
@@ -45,6 +47,8 @@ are present they will be used directly.}
 \item{return_list}{Logical; if \code{TRUE} returns list per station, else a row-bound data.frame.}
 
 \item{.handlers}{Optional named list of custom handlers (same signature used internally).}
+
+\item{.progress}{Logical. Show a simple text progress bar while downloading.}
 }
 \description{
 Batch Download of Daily Climate Data (SMN, NASA, or Hybrid)

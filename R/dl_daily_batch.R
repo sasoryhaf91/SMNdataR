@@ -9,7 +9,11 @@
 #' @param community POWER community for `"nasa"`/`"hybrid"`; one of `"AG","RE","SB"` (default `"AG"`).
 #' @param return_list Logical; if `TRUE` returns list per station, else a row-bound data.frame.
 #' @param .handlers Optional named list of custom handlers (same signature used internally).
+#' @param require_coords Logical. For NASA/Hybrid: resolve coordinates when missing in `stations`.
+#' @param .progress Logical. Show a simple text progress bar while downloading.
 #' @export
+#' @importFrom stats setNames reshape
+#' @importFrom utils data
 smn_dl_daily_batch <- function(stations,
                                source = c("smn","nasa","hybrid"),
                                start_date = "1961-01-01",

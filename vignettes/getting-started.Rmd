@@ -1,0 +1,113 @@
+---
+title: "Getting started with SMNdataR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with SMNdataR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6, fig.height = 4,
+  dpi = 96,
+  # MUY IMPORTANTE: evita usar internet en compilación.
+  eval = TRUE
+)
+```
+
+## Load package  
+
+```{r}
+library(SMNdataR)
+```
+
+## What you’ll learn
+
+- The shape of daily tables returned by smn_dl_daily_single().
+
+- A minimal, offline example (no internet needed to build this vignette).
+
+- Where to look for real downloads (code provided with eval = FALSE).
+
+
+## A tiny offline example
+
+We mimic the “full” daily table with synthetic data:
+
+```{r}
+toy <- data.frame(
+station   = "15101",
+latitude  = 19.50,
+longitude = -99.25,
+altitude  = 2250,
+date      = as.Date("2020-01-01") + 0:6,
+prec      = c(0, 2.1, 0, 5.3, NA, 0.5, 1.2),
+evap      = c(NA, 3.0, 3.2, 3.1, 2.9, 3.0, 2.8),
+tmax      = c(22, 23, 21, 20, 22, 21, 24),
+tmin      = c( 8,  9,  7,  6,  8,  7,  9),
+stringsAsFactors = FALSE
+)
+str(toy)
+head(toy)
+```
+
+## A simple monthly aggregation (demo only):
+
+```{r}
+toy$ym <- format(toy$date, "%Y-%m")
+aggregate(prec ~ ym, data = toy, sum, na.rm = TRUE)
+```
+
+## Real downloads (examples, not executed here)
+
+### SMN daily
+
+```{r}
+# df_smn <- smn_dl_daily_single(
+# station = "15101",
+# start_date = "2020-01-01", end_date = "2020-01-10",
+# output_format = "full"
+# )
+# head(df_smn)
+```
+
+### NASA POWER daily
+
+```{r}
+# df_np <- smn_dl_daily_nasa(
+# station = "Toluca_Node",
+# lat = 19.289, lon = -99.657,
+# start_date = "2020-01-01", end_date = "2020-01-10",
+# vars = c("T2M_MAX","T2M_MIN","PRECTOTCORR"),
+# output_format = "reduce"
+# )
+# head(df_np)
+```
+
+### Hybrid (SMN + NASA over the same coordinates)
+
+```{r}
+# stations <- data.frame(
+# station = c("15101","15021"),
+# latitude = c(NA, 19.5),
+# longitude = c(NA, -99.3),
+# altitude = NA
+# )
+# df_hyb <- smn_dl_daily_batch(
+# stations,
+# source = "hybrid",
+# start_date = "2020-01-01", end_date = "2020-01-05",
+# vars = c("T2M_MIN","T2M_MAX","PRECTOTCORR")
+# )
+# head(df_hyb)
+```
+
+## Session info
+
+```{r}
+sessionInfo()
+```
+

@@ -97,6 +97,8 @@
 #' }
 #'
 #' @export
+#' @importFrom stats setNames reshape
+#' @importFrom utils data
 smn_dl_monthly_single <- function(station,
                                   variables = "all",
                                   start_date = "1961-01-01",

@@ -21,6 +21,8 @@
 #' }
 #'
 #' @export
+#' @importFrom stats setNames reshape
+#' @importFrom utils data
 smn_info_get_station <- function(input) {
   # -- load reference dataset (for schema and empty-return template) ----------
   utils::data("stations", package = "SMNdataR", envir = environment())

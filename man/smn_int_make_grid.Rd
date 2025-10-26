@@ -15,6 +15,21 @@ smn_int_make_grid(
   return = c("polygons", "centroids", "both")
 )
 }
+\arguments{
+\item{lat}{Numeric latitude of center (WGS84).}
+
+\item{lon}{Numeric longitude of center (WGS84).}
+
+\item{cell_km}{Numeric cell size in kilometers (default 1).}
+
+\item{radius_km}{Numeric radius (km) for square/round extent.}
+
+\item{clip}{Logical; clip by country polygon (if available).}
+
+\item{crs_out}{Output CRS EPSG code (default 4326).}
+
+\item{return}{Character: "sf" or "data.frame".}
+}
 \description{
 Build a local square grid around a point (km-based) and clip by radius
 (robust CRS handling)

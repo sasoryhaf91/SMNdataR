@@ -54,6 +54,8 @@
 #'                    mode = "k", k = 15)
 #' }
 #' @export
+#' @importFrom stats setNames reshape
+#' @importFrom utils data
 smn_tl_find_nearby <- function(station = NULL,
                                lat = NULL, lon = NULL,
                                sources = c("both", "smn", "nasa"),

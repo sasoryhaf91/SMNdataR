@@ -1,3 +1,5 @@
-1# SMNdataR 0.1.0
+# SMNdataR 0.1.0
 
-* Initial CRAN submission.
+* First public release submitted to JOSS.
+* Daily downloads: SMN, NASA, and hybrid mode.
+* Nearby search tools and 1-km national grid metadata.

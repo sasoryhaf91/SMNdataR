@@ -57,6 +57,8 @@
 #' }
 #'
 #' @export
+#' @importFrom stats setNames reshape
+#' @importFrom utils data
 smn_dl_yearly_single <- function(station,
                                  start_date = "1961-01-01",
                                  end_date   = Sys.Date(),

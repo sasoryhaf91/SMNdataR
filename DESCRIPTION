@@ -62,17 +62,17 @@ Depends:
 Encoding: UTF-8
 Language: en
 LazyData: true
+LazyDataCompression: xz
 Imports:
     dplyr,
-    tidyr,
     lubridate,
-    stringr,
     httr,
     jsonlite,
     readr,
-    rlang,
     stats,
-    utils
+    utils,
+    geosphere,
+    sf
 Suggests:
     testthat (>= 3.0.0),
     knitr,
