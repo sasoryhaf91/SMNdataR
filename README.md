@@ -88,11 +88,15 @@ BibTeX entry:
 
 ## 🏛️ Funding and Acknowledgements
 
-This work was supported by the *Consejo Nacional de Humanidades, Ciencias y Tecnologías* (CONAHCYT, formerly CONACYT–SECyT) through a doctoral scholarship granted to the first author under the National Postgraduate System of Mexico.  
-We thank the *Servicio Meteorológico Nacional* (SMN) and the *Comisión Nacional del Agua* (CONAGUA) for providing open access to their climatological datasets.  
-We also acknowledge the institutional collaboration and academic support from the *Colegio de Postgraduados*, the *Universidad Mexiquense del Bicentenario*, and *CIMMYT México*.  
-Their contributions have been essential to developing reproducible tools that democratize access to meteorological data and promote open science in Mexico.
+This work was supported by the *Secretaría de Ciencia, Humanidades, Tecnología e Innvoción (SECIHTI)* 
+through a doctoral scholarship granted to the first author under the National Postgraduate System of Mexico. 
+We acknowledge the *Comisión Nacional del Agua (CONAGUA)* for maintaining and providing access to the national 
+meteorological database that forms the foundation of this package.
 
+We also thank the *Colegio de Postgraduados* and the *Universidad Mexiquense del Bicentenario* 
+for institutional support during the development of this research, as well as the International
+Maize and Wheat Improvement Center (CIMMYT) for fostering open collaboration in climate and agricultural research. 
+Their combined contributions have been essential to the conception, validation, and dissemination of the `SMNdataR` package.
 ---
 
 ## 🧾 License
