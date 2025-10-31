@@ -49,7 +49,7 @@ Authors@R:
         comment = c(URL = "https://www.umb.mx")
       )
     )
-Description: Functions to download, clean, and analyze daily and monthly
+Description: Functions to download, clean, and analyze daily
     climatological data from Mexico's National Weather Service (SMN), including
     robust retrieval, parsing, and aggregation utilities. The package provides
     reproducible pipelines for station metadata, daily time series, and monthly

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dl_daily_batch.R
 \name{smn_dl_daily_batch}
 \alias{smn_dl_daily_batch}
-\title{Batch Download of Daily Climate Data (SMN, NASA, or Hybrid)}
+\title{Batch Download of Daily Climate Data (SMN, NASA POWER, or Hybrid)}
 \usage{
 smn_dl_daily_batch(
   stations,
@@ -20,36 +20,136 @@ smn_dl_daily_batch(
 )
 }
 \arguments{
-\item{stations}{Character/numeric vector of station codes, or a data frame with
-at least \code{station}; for NASA/Hybrid, if \code{latitude}, \code{longitude}, \code{altitude}
-are present they will be used directly.}
+\item{stations}{Character/numeric vector of station codes \emph{or} a data frame
+with at least a \code{station} column. For \code{source = "nasa"} or \code{"hybrid"},
+if \code{latitude}, \code{longitude}, \code{altitude} are present, they will be used
+directly; otherwise the function will try to resolve them (see \code{require_coords}).}
 
-\item{source}{One of \code{"smn"}, \code{"nasa"}, \code{"hybrid"}, or a custom handler in \code{.handlers}.}
+\item{source}{One of \code{"smn"}, \code{"nasa"}, \code{"hybrid"}, or a custom
+key present in \code{.handlers}.}
 
-\item{start_date}{Start date (inclusive). Character or Date. Default "1961-01-01".}
+\item{start_date}{Start date (inclusive). \code{Date} or \code{character}. Default \code{"1961-01-01"}.}
 
-\item{end_date}{End date (inclusive). Character or Date. Default Sys.Date().}
+\item{end_date}{End date (inclusive). \code{Date} or \code{character}. Default \code{Sys.Date()}.}
 
-\item{output_format}{Output format: "full" (default) or "reduced".
+\item{output_format}{Output format: \code{"full"} (default) or \code{"reduced"}.
 \itemize{
-\item "full": station, latitude, longitude, altitude, date, prec, evap, tmax, tmin
-\item "reduced": date, prec, evap, tmax, tmin
+\item \strong{full}: \code{station, latitude, longitude, altitude, date, prec, evap, tmax, tmin}
+\item \strong{reduced}: \code{date, prec, evap, tmax, tmin}
 }}
 
-\item{del_na}{One of "no" (default) or "yes". If "yes", rows with NAs are dropped at the end.}
+\item{del_na}{\code{"no"} (default) or \code{"yes"}. If \code{"yes"}, rows containing \code{NA}
+are dropped at the end.}
 
-\item{require_coords}{Logical. For NASA/Hybrid: resolve coordinates when missing in \code{stations}.}
+\item{require_coords}{Logical. For \code{"nasa"}/\code{"hybrid"}: attempt to resolve
+missing coordinates using \code{smn_int_extract_coordinates()} when \code{latitude/longitude}
+are not provided in \code{stations}.}
 
-\item{vars}{Character vector of NASA POWER parameter codes (used in \code{"nasa"}/\code{"hybrid"}).}
+\item{vars}{Character vector with NASA POWER parameter codes used in
+\code{source = "nasa"} or \code{"hybrid"} (e.g., \code{c("T2M_MIN","T2M_MAX","PRECTOTCORR")}).}
 
-\item{community}{POWER community for \code{"nasa"}/\code{"hybrid"}; one of \verb{"AG","RE","SB"} (default \code{"AG"}).}
+\item{community}{NASA POWER community for \code{"nasa"}/\code{"hybrid"}; one of
+\code{"AG"}, \code{"RE"}, \code{"SB"} (default \code{"AG"}).}
 
-\item{return_list}{Logical; if \code{TRUE} returns list per station, else a row-bound data.frame.}
+\item{return_list}{Logical; if \code{TRUE}, returns a named list (one element per station).
+If \code{FALSE} (default), returns a single tidy data frame with all rows bound.}
 
-\item{.handlers}{Optional named list of custom handlers (same signature used internally).}
+\item{.handlers}{Optional named list of custom handlers with signature
+\code{function(station, start_date, end_date, output_format, del_na, row, vars, community)}.}
 
 \item{.progress}{Logical. Show a simple text progress bar while downloading.}
 }
+\value{
+A \strong{data frame} (default) with all stations row-bound in chronological order per station,
+or a \strong{named list} of per-station data frames when \code{return_list = TRUE}.
+}
 \description{
-Batch Download of Daily Climate Data (SMN, NASA, or Hybrid)
+Downloads daily meteorological series for \strong{multiple stations} from:
+\itemize{
+\item \strong{SMN} (official in-situ records),
+\item \strong{NASA POWER} (satellite/reanalysis),
+\item \strong{Hybrid}: joins SMN (full) + NASA POWER variables by \code{station + date}.
+}
+It harmonizes output columns (station metadata, date, core SMN variables, and optional
+NASA POWER variables) and returns either a single tidy data frame (row-bound)
+or a list per station.
+}
+\details{
+\strong{Output columns} depend on \code{source}:
+\itemize{
+\item \code{source = "smn"}: \code{station, latitude, longitude, altitude, date, prec, evap, tmax, tmin}
+(or reduced set if \code{output_format = "reduced"}).
+\item \code{source = "nasa"}: \code{station, latitude, longitude, altitude, date} + requested \code{vars}.
+\item \code{source = "hybrid"}: union of SMN core variables + requested NASA \code{vars}.
+}
+If some branch fails for a given station, the function continues and returns what is available
+(empty data frame for that station), warning as needed. When \code{return_list = FALSE},
+results are row-bound in the end, keeping a consistent column order per \code{source}.
+}
+\section{Custom handlers}{
+
+You can extend sources via \code{.handlers}, e.g.:
+\preformatted{
+  my_h <- list(
+    era5 = function(station, start_date, end_date, output_format, del_na, row, vars, community) {
+      # ... your downloader; must return a data.frame with at least
+      # station, date, latitude, longitude, altitude, and variables
+    }
+  )
+  smn_dl_daily_batch(stations = c("15021","15101"),
+                     source = "era5",
+                     start_date = "2000-01-01", end_date = "2000-01-10",
+                     .handlers = my_h)
+}
+}
+
+\examples{
+\dontrun{
+# --- Minimal examples (short date window) ---
+
+# 1) SMN only (two stations, short period)
+df_smn <- smn_dl_daily_batch(
+  stations = c("15021","15101"),
+  source   = "smn",
+  start_date = "2020-01-01",
+  end_date   = "2020-01-05",
+  output_format = "full",
+  del_na = "no",
+  .progress = TRUE
+)
+head(df_smn)
+
+# 2) NASA POWER only — if you already know coordinates for each station
+st <- data.frame(
+  station   = c("X15021","X15101"),
+  latitude  = c(19.35, 19.70),
+  longitude = c(-99.10, -99.20),
+  altitude  = c(2250, 2400)
+)
+df_nasa <- smn_dl_daily_batch(
+  stations = st,
+  source   = "nasa",
+  start_date = "2020-01-01",
+  end_date   = "2020-01-03",
+  vars = c("T2M_MIN","T2M_MAX","PRECTOTCORR"),
+  community = "AG",
+  .progress = FALSE
+)
+head(df_nasa)
+
+# 3) HYBRID (SMN + NASA POWER merged by station/date)
+df_hyb <- smn_dl_daily_batch(
+  stations = c("15021","15101"),
+  source   = "hybrid",
+  start_date = "2020-01-01",
+  end_date   = "2020-01-05",
+  vars = c("T2M_MIN","T2M_MAX","PRECTOTCORR"),
+  .progress = TRUE
+)
+head(df_hyb)
+}
+}
+\seealso{
+\code{\link{smn_dl_daily_single}}, \code{\link{smn_dl_daily_nasa}},
+\code{\link{smn_int_extract_coordinates}}
 }

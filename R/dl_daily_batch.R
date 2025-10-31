@@ -1,19 +1,117 @@
-#' Batch Download of Daily Climate Data (SMN, NASA, or Hybrid)
+#' Batch Download of Daily Climate Data (SMN, NASA POWER, or Hybrid)
+#'
+#' Downloads daily meteorological series for **multiple stations** from:
+#' \itemize{
+#'   \item \strong{SMN} (official in-situ records),
+#'   \item \strong{NASA POWER} (satellite/reanalysis),
+#'   \item \strong{Hybrid}: joins SMN (full) + NASA POWER variables by \code{station + date}.
+#' }
+#' It harmonizes output columns (station metadata, date, core SMN variables, and optional
+#' NASA POWER variables) and returns either a single tidy data frame (row-bound)
+#' or a list per station.
 #'
 #' @inheritParams smn_dl_daily_single
-#' @param stations Character/numeric vector of station codes, or a data frame with
-#'   at least `station`; for NASA/Hybrid, if `latitude`, `longitude`, `altitude`
-#'   are present they will be used directly.
-#' @param source One of `"smn"`, `"nasa"`, `"hybrid"`, or a custom handler in `.handlers`.
-#' @param vars Character vector of NASA POWER parameter codes (used in `"nasa"`/`"hybrid"`).
-#' @param community POWER community for `"nasa"`/`"hybrid"`; one of `"AG","RE","SB"` (default `"AG"`).
-#' @param return_list Logical; if `TRUE` returns list per station, else a row-bound data.frame.
-#' @param .handlers Optional named list of custom handlers (same signature used internally).
-#' @param require_coords Logical. For NASA/Hybrid: resolve coordinates when missing in `stations`.
+#' @param stations Character/numeric vector of station codes \emph{or} a data frame
+#'   with at least a \code{station} column. For \code{source = "nasa"} or \code{"hybrid"},
+#'   if \code{latitude}, \code{longitude}, \code{altitude} are present, they will be used
+#'   directly; otherwise the function will try to resolve them (see \code{require_coords}).
+#' @param source One of \code{"smn"}, \code{"nasa"}, \code{"hybrid"}, or a custom
+#'   key present in \code{.handlers}.
+#' @param vars Character vector with NASA POWER parameter codes used in
+#'   \code{source = "nasa"} or \code{"hybrid"} (e.g., \code{c("T2M_MIN","T2M_MAX","PRECTOTCORR")}).
+#' @param community NASA POWER community for \code{"nasa"}/\code{"hybrid"}; one of
+#'   \code{"AG"}, \code{"RE"}, \code{"SB"} (default \code{"AG"}).
+#' @param return_list Logical; if \code{TRUE}, returns a named list (one element per station).
+#'   If \code{FALSE} (default), returns a single tidy data frame with all rows bound.
+#' @param .handlers Optional named list of custom handlers with signature
+#'   \code{function(station, start_date, end_date, output_format, del_na, row, vars, community)}.
+#' @param require_coords Logical. For \code{"nasa"}/\code{"hybrid"}: attempt to resolve
+#'   missing coordinates using \code{smn_int_extract_coordinates()} when \code{latitude/longitude}
+#'   are not provided in \code{stations}.
 #' @param .progress Logical. Show a simple text progress bar while downloading.
+#'
+#' @details
+#' \strong{Output columns} depend on \code{source}:
+#' \itemize{
+#'   \item \code{source = "smn"}: \code{station, latitude, longitude, altitude, date, prec, evap, tmax, tmin}
+#'     (or reduced set if \code{output_format = "reduced"}).
+#'   \item \code{source = "nasa"}: \code{station, latitude, longitude, altitude, date} + requested \code{vars}.
+#'   \item \code{source = "hybrid"}: union of SMN core variables + requested NASA \code{vars}.
+#' }
+#' If some branch fails for a given station, the function continues and returns what is available
+#' (empty data frame for that station), warning as needed. When \code{return_list = FALSE},
+#' results are row-bound in the end, keeping a consistent column order per \code{source}.
+#'
+#' @return
+#' A \strong{data frame} (default) with all stations row-bound in chronological order per station,
+#' or a \strong{named list} of per-station data frames when \code{return_list = TRUE}.
+#'
+#' @section Custom handlers:
+#' You can extend sources via \code{.handlers}, e.g.:
+#' \preformatted{
+#'   my_h <- list(
+#'     era5 = function(station, start_date, end_date, output_format, del_na, row, vars, community) {
+#'       # ... your downloader; must return a data.frame with at least
+#'       # station, date, latitude, longitude, altitude, and variables
+#'     }
+#'   )
+#'   smn_dl_daily_batch(stations = c("15021","15101"),
+#'                      source = "era5",
+#'                      start_date = "2000-01-01", end_date = "2000-01-10",
+#'                      .handlers = my_h)
+#' }
+#'
+#' @seealso
+#' \code{\link{smn_dl_daily_single}}, \code{\link{smn_dl_daily_nasa}},
+#' \code{\link{smn_int_extract_coordinates}}
+#'
 #' @export
-#' @importFrom stats setNames reshape
-#' @importFrom utils data
+#' @importFrom utils data txtProgressBar setTxtProgressBar
+#' @examples
+#' \dontrun{
+#' # --- Minimal examples (short date window) ---
+#'
+#' # 1) SMN only (two stations, short period)
+#' df_smn <- smn_dl_daily_batch(
+#'   stations = c("15021","15101"),
+#'   source   = "smn",
+#'   start_date = "2020-01-01",
+#'   end_date   = "2020-01-05",
+#'   output_format = "full",
+#'   del_na = "no",
+#'   .progress = TRUE
+#' )
+#' head(df_smn)
+#'
+#' # 2) NASA POWER only — if you already know coordinates for each station
+#' st <- data.frame(
+#'   station   = c("X15021","X15101"),
+#'   latitude  = c(19.35, 19.70),
+#'   longitude = c(-99.10, -99.20),
+#'   altitude  = c(2250, 2400)
+#' )
+#' df_nasa <- smn_dl_daily_batch(
+#'   stations = st,
+#'   source   = "nasa",
+#'   start_date = "2020-01-01",
+#'   end_date   = "2020-01-03",
+#'   vars = c("T2M_MIN","T2M_MAX","PRECTOTCORR"),
+#'   community = "AG",
+#'   .progress = FALSE
+#' )
+#' head(df_nasa)
+#'
+#' # 3) HYBRID (SMN + NASA POWER merged by station/date)
+#' df_hyb <- smn_dl_daily_batch(
+#'   stations = c("15021","15101"),
+#'   source   = "hybrid",
+#'   start_date = "2020-01-01",
+#'   end_date   = "2020-01-05",
+#'   vars = c("T2M_MIN","T2M_MAX","PRECTOTCORR"),
+#'   .progress = TRUE
+#' )
+#' head(df_hyb)
+#' }
 smn_dl_daily_batch <- function(stations,
                                source = c("smn","nasa","hybrid"),
                                start_date = "1961-01-01",
@@ -26,7 +124,6 @@ smn_dl_daily_batch <- function(stations,
                                return_list = FALSE,
                                .handlers = NULL,
                                .progress = TRUE) {
-
   output_format <- match.arg(output_format)
   del_na        <- match.arg(del_na)
   community     <- match.arg(community)
@@ -150,7 +247,7 @@ smn_dl_daily_batch <- function(stations,
       warning("HYBRID: coordinates unavailable for station ", station, " (skipping NASA).")
     }
 
-    # 3) fusion
+    # 3) merge/fuse
     if (nrow(smn_df) > 0L && nrow(nasa_df) > 0L) {
       nasa_keep <- c("station","date", intersect(vars, names(nasa_df)))
       nasa_df2  <- nasa_df[, nasa_keep, drop = FALSE]
@@ -169,7 +266,6 @@ smn_dl_daily_batch <- function(stations,
     } else if (nrow(smn_df) > 0L) {
       smn_vars  <- intersect(c("prec","evap","tmax","tmin"), names(smn_df))
       front     <- c("station","latitude","longitude","altitude","date")
-      # rellena encabezado de vars NASA como NA para mantener esquema híbrido
       for (m in setdiff(vars, names(smn_df))) smn_df[[m]] <- NA_real_
       cols <- unique(c(front, smn_vars, vars))
       out <- smn_df[, intersect(cols, names(smn_df)), drop = FALSE]
@@ -219,7 +315,7 @@ smn_dl_daily_batch <- function(stations,
 
   if (isTRUE(return_list)) return(out_list)
 
-  # ---- ensamblado final dependiente de `source`
+  # assemble final table according to `source`
   non_empty <- out_list[vapply(out_list, function(x) is.data.frame(x) && nrow(x) > 0L, logical(1))]
 
   expected_cols <- switch(
@@ -230,20 +326,19 @@ smn_dl_daily_batch <- function(stations,
       c("date","prec","evap","tmax","tmin"),
     "nasa" = c("station","latitude","longitude","altitude","date", vars),
     "hybrid" = c("station","latitude","longitude","altitude","date","prec","evap","tmax","tmin", vars),
-    # fallback (no debería alcanzarse)
     c("station","latitude","longitude","altitude","date")
   )
 
   if (!length(non_empty)) {
-    out <- setNames(replicate(length(expected_cols), logical(0)), expected_cols)
+    out <- stats::setNames(replicate(length(expected_cols), logical(0)), expected_cols)
     out <- as.data.frame(out, check.names = FALSE)
     if ("date" %in% names(out)) out$date <- as.Date(out$date)
     return(out)
   }
 
+  # bind rows robustly
   out <- tryCatch(dplyr::bind_rows(non_empty), error = function(e) do.call(rbind, non_empty))
 
-  # recorta/ordena según `source`
   keep <- intersect(expected_cols, names(out))
   out  <- out[, keep, drop = FALSE]
 

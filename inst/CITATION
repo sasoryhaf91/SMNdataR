@@ -1,13 +1,19 @@
-citHeader("To cite SMNdataR in publications use:")
+citHeader("To cite SMNdataR in publications, use:")
 
 citEntry(
-  entry   = "Manual",
-  title   = "SMNdataR: Tools to download and harmonize SMN/NASA data",
-  author  = personList(
-    person("Hugo Antonio", "Fernández")
-    # , person("Coauthor", "Surname")
+  entry = "Manual",
+  title = "SMNdataR: Tools for Processing and Analyzing Mexican Meteorological Data for Climatological Applications",
+  author = c(
+    as.person("Hugo Antonio-Fernández"),
+    as.person("Humberto Vaquera-Huerta"),
+    as.person("Moisés Michel Rosengaus-Moshinsky"),
+    as.person("Paulino Pérez-Rodríguez"),
+    as.person("José Crossa")
   ),
-  year    = "2025",
-  note    = "R package version 0.1.0",
-  url     = "https://github.com/sasoryhaf91/SMNdataR"
+  year = "2025",
+  organization = "Colegio de Postgraduados & Universidad Mexiquense del Bicentenario",
+  url = "https://doi.org/10.5281/zenodo.17451876",
+  note = "Version 0.1.0",
+  textVersion =
+    "Antonio-Fernández, H., Vaquera-Huerta, H., Rosengaus-Moshinsky, M. M., Pérez-Rodríguez, P., & Crossa, J. (2025). SMNdataR: Tools for Processing and Analyzing Mexican Meteorological Data for Climatological Applications. Zenodo. https://doi.org/10.5281/zenodo.17451876"
 )

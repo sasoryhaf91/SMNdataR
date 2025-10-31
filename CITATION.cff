@@ -1,33 +1,35 @@
 cff-version: 1.2.0
 title: "SMNdataR: Tools for Processing and Analyzing Mexican Meteorological Data for Climatological Applications"
-message: "If you use SMNdataR, please cite it using the following metadata."
-type: software
+message: "If you use this package, please cite it as below."
+version: 0.1.0
+doi: 10.5281/zenodo.17451876
 authors:
-  - family-names: "Antonio-Fernández"
-    given-names: "Hugo"
+  - family-names: Antonio-Fernández
+    given-names: Hugo
     orcid: "https://orcid.org/0000-0002-5355-8476"
-  - family-names: "Vaquera-Huerta"
-    given-names: "Humberto"
+    affiliation: "Colegio de Postgraduados; Universidad Mexiquense del Bicentenario"
+  - family-names: Vaquera-Huerta
+    given-names: Humberto
     orcid: "https://orcid.org/0000-0002-2805-804X"
-  - family-names: "Rosengaus-Moshinsky"
-    given-names: "Moisés Michel"
-  - family-names: "Pérez-Rodríguez"
-    given-names: "Paulino"
+    affiliation: "Colegio de Postgraduados"
+  - family-names: Rosengaus-Moshinsky
+    given-names: Moisés Michel
+    affiliation: "Consultor Independiente"
+  - family-names: Pérez-Rodríguez
+    given-names: Paulino
     orcid: "https://orcid.org/0000-0002-3202-1784"
-  - family-names: "Crossa"
-    given-names: "José"
+    affiliation: "Colegio de Postgraduados"
+  - family-names: Crossa
+    given-names: José
     orcid: "https://orcid.org/0000-0001-9429-5855"
-repository-code: "https://github.com/sasoryhaf91/SMNdataR"
-license: "MIT"
-version: "0.1.0"
-doi: "10.xxxx/zenodo.xxxxxx"
+    affiliation: "CIMMYT Mexico"
 date-released: "2025-10-26"
-keywords:
-  - R
-  - meteorology
-  - climatology
-  - data-processing
-  - SMN
-  - Mexico
-  - hydrology
-  - climate change
+license: MIT
+repository-code: "https://github.com/sasoryhaf91/SMNdataR"
+url: "https://doi.org/10.5281/zenodo.17451876"
+abstract: >
+  SMNdataR provides tools for downloading, cleaning, and analyzing daily and monthly
+  meteorological data from Mexico’s National Weather Service (SMN). It supports
+  reproducible workflows for climatological, hydrological, and environmental research
+  through automated data retrieval, station metadata harmonization, and auxiliary
+  variable integration.

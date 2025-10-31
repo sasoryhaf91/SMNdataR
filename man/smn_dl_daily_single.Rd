@@ -2,7 +2,7 @@
 % Please edit documentation in R/dl_daily_single.R
 \name{smn_dl_daily_single}
 \alias{smn_dl_daily_single}
-\title{Download and Structure Daily Station Data}
+\title{Download and Structure Daily Station Data (SMN)}
 \usage{
 smn_dl_daily_single(
   station,
@@ -13,26 +13,66 @@ smn_dl_daily_single(
 )
 }
 \arguments{
-\item{station}{Character or numeric SMN station code (e.g., "15101").}
+\item{station}{Character or numeric SMN station code (e.g., \code{"15101"}).}
 
-\item{start_date}{Start date (inclusive). Character or Date. Default "1961-01-01".}
+\item{start_date}{Start date (inclusive). \code{Date} or \code{character}. Default \code{"1961-01-01"}.}
 
-\item{end_date}{End date (inclusive). Character or Date. Default Sys.Date().}
+\item{end_date}{End date (inclusive). \code{Date} or \code{character}. Default \code{Sys.Date()}.}
 
-\item{output_format}{Output format: "full" (default) or "reduced".
+\item{output_format}{Output format: \code{"full"} (default) or \code{"reduced"}.
 \itemize{
-\item "full": station, latitude, longitude, altitude, date, prec, evap, tmax, tmin
-\item "reduced": date, prec, evap, tmax, tmin
+\item \strong{full}: \code{station, latitude, longitude, altitude, date, prec, evap, tmax, tmin}
+\item \strong{reduced}: \code{date, prec, evap, tmax, tmin}
 }}
 
-\item{del_na}{One of "no" (default) or "yes". If "yes", rows with NAs are dropped at the end.}
+\item{del_na}{\code{"no"} (default) or \code{"yes"}. If \code{"yes"}, rows containing \code{NA}
+are dropped at the end.}
 }
 \value{
-A base data.frame. When no rows fall in the date range or download fails,
-returns an empty data frame with the appropriate columns for the chosen format.
+A \strong{data.frame} with the columns defined by \code{output_format}, ordered by date.
+If no rows fall within the requested window or the download fails, returns an
+empty data frame with the appropriate columns for the chosen format.
 }
 \description{
-Downloads raw daily data for an SMN station, filters by date, attaches the
-station coordinates, and returns a cleaned data frame in either \emph{full} or
-\emph{reduced} format.
+Downloads raw daily data for a given SMN station, filters it by a date window,
+attaches station coordinates, and returns a cleaned table in either \emph{full} or
+\emph{reduced} format. This is the basic building block used by higher-level
+functions (e.g., \code{\link{smn_dl_daily_batch}} or the hybrid workflow).
+}
+\details{
+The function:
+\enumerate{
+\item Downloads raw daily data via \code{\link{smn_dl_daily_raw}} (best effort).
+\item Filters by \code{start_date <= date <= end_date}.
+\item Ensures variables \code{prec, evap, tmax, tmin} exist (filling missing ones with \code{NA}).
+\item Attaches coordinates using \code{\link{smn_int_extract_coordinates}} (falls back to \code{NA} on failure).
+}
+The goal is to deliver a stable, tidy-ready table for downstream analyses and
+for integration with auxiliary sources (e.g., NASA POWER) in hybrid workflows.
+}
+\examples{
+\dontrun{
+# Minimal example (short window) with 'full' output
+df_full <- smn_dl_daily_single(
+  station = "15101",
+  start_date = "2020-01-01",
+  end_date   = "2020-01-07",
+  output_format = "full",
+  del_na = "no"
+)
+head(df_full)
+
+# Same interval but 'reduced' output
+df_red <- smn_dl_daily_single(
+  station = "15101",
+  start_date = "2020-01-01",
+  end_date   = "2020-01-07",
+  output_format = "reduced"
+)
+head(df_red)
+}
+}
+\seealso{
+\code{\link{smn_dl_daily_raw}}, \code{\link{smn_int_extract_coordinates}},
+\code{\link{smn_dl_daily_batch}}
 }
