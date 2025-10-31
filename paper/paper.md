@@ -33,7 +33,7 @@ affiliations:
 date: "2025-10-26"
 bibliography: paper.bib
 repository: "https://github.com/sasoryhaf91/SMNdataR"
-archive_doi: 
+archive_doi: 10.5281/zenodo.17495178
 ---
 
 # Summary

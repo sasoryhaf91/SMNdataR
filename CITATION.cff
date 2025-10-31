@@ -2,7 +2,7 @@ cff-version: 1.2.0
 title: "SMNdataR: Tools for Processing and Analyzing Mexican Meteorological Data for Climatological Applications"
 message: "If you use this package, please cite it as below."
 version: 0.1.0
-doi: 10.5281/zenodo.17451876
+doi: 10.5281/zenodo.17495178
 authors:
   - family-names: Antonio-Fernández
     given-names: Hugo
@@ -26,9 +26,9 @@ authors:
 date-released: "2025-10-26"
 license: MIT
 repository-code: "https://github.com/sasoryhaf91/SMNdataR"
-url: "https://doi.org/10.5281/zenodo.17451876"
+url: "https://doi.org/10.5281/zenodo.17495178"
 abstract: >
-  SMNdataR provides tools for downloading, cleaning, and analyzing daily and monthly
+  SMNdataR provides tools for downloading, cleaning, and analyzing daily
   meteorological data from Mexico’s National Weather Service (SMN). It supports
   reproducible workflows for climatological, hydrological, and environmental research
   through automated data retrieval, station metadata harmonization, and auxiliary

@@ -1,7 +1,7 @@
 # 🛰️ SMNdataR
 ### Tools for Processing and Analyzing Mexican Meteorological Data for Climatological Applications
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17451876.svg)](https://doi.org/10.5281/zenodo.17451876)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17451875.svg)](https://doi.org/10.5281/zenodo.17451875)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![JOSS status](https://joss.theoj.org/papers/under_review.svg)](https://joss.theoj.org/)
 [![R](https://img.shields.io/badge/R->=3.5-blue.svg)](https://cran.r-project.org/)
@@ -141,6 +141,6 @@ Your citation helps recognize the effort invested in developing open and reprodu
 > Antonio-Fernández, H., Vaquera-Huerta, H., Rosengaus-Moshinsky, M. M., Pérez-Rodríguez, P., & Crossa, J. (2025).  
 > *SMNdataR: Tools for Processing and Analyzing Mexican Meteorological Data for Climatological Applications.*  
 > Journal of Open Source Software, *In Review*.  
-> DOI: [10.5281/zenodo.17451876](https://doi.org/10.5281/zenodo.17451876)
+> DOI: [10.5281/zenodo.17451876](https://doi.org/10.5281/zenodo.17495178)
 
   
