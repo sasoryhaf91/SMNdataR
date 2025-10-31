@@ -55,7 +55,7 @@ Description: Functions to download, clean, and analyze daily
     reproducible pipelines for station metadata, daily time series, and monthly
     summaries with completeness checks.
 License: MIT + file LICENSE
-URL: https://github.com/sasoryhaf91/SMNdataR
+URL: https://github.com/sasoryhaf91/SMNdataR, https://sasoryhaf91.github.io/SMNdataR/
 BugReports: https://github.com/sasoryhaf91/SMNdataR/issues
 Depends:
     R (>= 4.1)
