@@ -97,6 +97,7 @@ We also thank the *Colegio de Postgraduados* and the *Universidad Mexiquense del
 for institutional support during the development of this research, as well as the International
 Maize and Wheat Improvement Center (CIMMYT) for fostering open collaboration in climate and agricultural research. 
 Their combined contributions have been essential to the conception, validation, and dissemination of the `SMNdataR` package.
+
 ---
 
 ## 🧾 License
