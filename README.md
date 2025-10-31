@@ -12,7 +12,7 @@
 ## 📘 Overview
 
 `SMNdataR` is an **open-source R package** designed to automate the **retrieval, cleaning, and analysis of climatological data** from Mexico’s *Servicio Meteorológico Nacional (SMN)*.  
-It provides fully reproducible workflows for handling large volumes of daily meteorological data, integrating **station metadata**, **completeness checks**, and optional **hybrid fusion** with open global datasets such as **NASA POWER** and **CHIRPS**.
+It provides fully reproducible workflows for handling large volumes of daily meteorological data, integrating **station metadata**, **completeness checks**, and optional **hybrid fusion** with open global datasets such as **NASA POWER**.
 
 The package fills a major gap in the accessibility of meteorological information in Mexico, where open data are limited and existing systems (e.g., CLICOM, ERIC IV) do not allow for automated, large-scale downloads or integration into reproducible analytical pipelines.
 
