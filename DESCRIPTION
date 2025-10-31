@@ -58,7 +58,7 @@ License: MIT + file LICENSE
 URL: https://github.com/sasoryhaf91/SMNdataR
 BugReports: https://github.com/sasoryhaf91/SMNdataR/issues
 Depends:
-    R (>= 3.5)
+    R (>= 4.1)
 Encoding: UTF-8
 Language: en
 LazyData: true
