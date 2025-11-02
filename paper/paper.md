@@ -22,13 +22,13 @@ authors:
     orcid: "0000-0001-9429-5855"
     affiliation: 4
 affiliations:
-  - name: "Colegio de Postgraduados, Mexico"
+  - name: "Colegio de Postgraduados, México"
     index: 1
-  - name: "Universidad Mexiquense del Bicentenario, Mexico"
+  - name: "Universidad Mexiquense del Bicentenario, México"
     index: 2
   - name: "Independent Consultant"
     index: 3
-  - name: "CIMMYT, Mexico"
+  - name: "CIMMYT, México"
     index: 4
 date: "2025-10-26"
 bibliography: paper.bib
@@ -39,7 +39,7 @@ archive_doi: 10.5281/zenodo.17495178
 # Summary
 
 Access to open and high-quality meteorological data is essential for climate research, hydrological modeling, 
-and environmental decision-making [@Hampton2015OpenScience; @Sandve2013TenSimpleRules]. However, in Mexico, 
+and environmental decision-making [@Hampton2015OpenScience; @Sandve2013TenSimpleRules]. However, in México, 
 access to meteorological information remains limited, fragmented, and largely manual. 
 Although the SMN provides historical climate data through 
 web-based interfaces and legacy systems such as CLICOM (Climate Computing Project) and 
@@ -200,9 +200,9 @@ toward open, interoperable, and FAIR-compliant environmental data systems.
 
 # Acknowledgements
 
-This work was supported by the Secretaría de Ciencia, Humanidades, Tecnología e Innvoción
+This work was supported by the Secretaría de Ciencia, Humanidades, Tecnología e Innovación
 (SECIHTI) through a doctoral scholarship granted to the first author 
-under the National Postgraduate System of Mexico. We acknowledge the Comisión Nacional del Agua (CONAGUA) 
+under the National Postgraduate System of México. We acknowledge the Comisión Nacional del Agua (CONAGUA) 
 for maintaining and providing access to the national meteorological 
 database that forms the foundation of this package.
 
