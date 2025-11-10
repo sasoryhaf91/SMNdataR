@@ -60,6 +60,7 @@ The **data retrieval** functions automate access to SMN repositories through sin
 The **metadata** functions (`smn_int_extract_coordinates()`, `smn_int_get_station()`) harmonize identifiers, coordinates, and altitude information, allowing integration with spatial datasets or digital elevation models.
 
 The package follows open-source best practices:
+
 - **Reproducibility:** All functions return consistent outputs suitable for version control.  
 - **Interoperability:** Fully compatible with the `tidyverse` ecosystem (`dplyr`, `ggplot2`, `sf`).  
 - **Scalability:** Handles millions of daily records efficiently with vectorized operations.  
