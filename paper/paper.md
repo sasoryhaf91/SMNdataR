@@ -66,6 +66,8 @@ The package follows open-source best practices:
 - **Scalability:** Handles millions of daily records efficiently with vectorized operations.  
 - **Extensibility:** Modular design allows future integration of ERA5, MODIS, or CHIRPS data.
 
+# Example
+
 A typical workflow retrieves daily precipitation and temperature data for several stations, merges them with NASA POWER variables, and exports a unified dataset:
 
 
